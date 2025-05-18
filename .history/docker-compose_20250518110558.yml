@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 3000
+      - 3000:3000
     command: ["./wait-for-it.sh", "database:5432", "--", "yarn", "start:server"]
     volumes:
       - /usr/src/app
@@ -15,14 +15,6 @@ services:
     depends_on:
       - database
       - worker
-    networks:
-      - dokploy-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.vendure-server.rule=Host(`admin.futuretools.app`)"
-      - "traefik.http.routers.vendure-server.entrypoints=websecure"
-      - "traefik.http.routers.vendure-server.tls.certResolver=letsencrypt"
-      - "traefik.http.services.vendure-server.loadbalancer.server.port=3000"
   worker:
     build:
       context: .
@@ -35,8 +27,6 @@ services:
       DATABASE_PORT: 5432
     depends_on:
       - database
-    networks:
-      - dokploy-network
   storefront:
     build:
       context: .
@@ -44,31 +34,17 @@ services:
       args:
         STOREFRONT_VERSION: 0.3.1
     ports:
-      - 4000
+      - 4000:4000
     environment:
       SERVER_API_HOST: http://server
       SERVER_API_PORT: 3000
       SERVER_API_PATH: shop-api
-    networks:
-      - dokploy-network
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.vendure-storefront.rule=Host(`store.futuretools.app`)"
-      - "traefik.http.routers.vendure-storefront.entrypoints=websecure"
-      - "traefik.http.routers.vendure-storefront.tls.certResolver=letsencrypt"
-      - "traefik.http.services.vendure-storefront.loadbalancer.server.port=4000"
   database:
     image: postgres
     volumes:
       - /var/lib/postgresql/data
     ports:
-      - 5432
+      - 5432:5432
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: vendure
-    networks:
-      - dokploy-network
-
-networks:
-  dokploy-network:
-    external: true

@@ -19,7 +19,7 @@ services:
       - dokploy-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.vendure-server.rule=Host(`admin.futuretools.app`)"
+      - "traefik.http.routers.vendure-server.rule=Host(`your-domain.com`)"
       - "traefik.http.routers.vendure-server.entrypoints=websecure"
       - "traefik.http.routers.vendure-server.tls.certResolver=letsencrypt"
       - "traefik.http.services.vendure-server.loadbalancer.server.port=3000"
@@ -53,7 +53,7 @@ services:
       - dokploy-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.vendure-storefront.rule=Host(`store.futuretools.app`)"
+      - "traefik.http.routers.vendure-storefront.rule=Host(`storefront.your-domain.com`)"
       - "traefik.http.routers.vendure-storefront.entrypoints=websecure"
       - "traefik.http.routers.vendure-storefront.tls.certResolver=letsencrypt"
       - "traefik.http.services.vendure-storefront.loadbalancer.server.port=4000"
