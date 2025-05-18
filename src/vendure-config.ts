@@ -1,8 +1,9 @@
 import { DefaultJobQueuePlugin, DefaultSearchPlugin, dummyPaymentHandler, VendureConfig, } from '@vendure/core';
-import { AssetServerPlugin } from '@vendure/asset-server-plugin';
+import { AssetServerPlugin, configureS3AssetStorage } from '@vendure/asset-server-plugin';
 import { AdminUiPlugin } from '@vendure/admin-ui-plugin';
 import { defaultEmailHandlers, EmailPlugin } from '@vendure/email-plugin';
 import path from 'path';
+import { DefaultAssetNamingStrategy } from '@vendure/core';
 
 export const config: VendureConfig = {
     apiOptions: {
@@ -52,7 +53,21 @@ export const config: VendureConfig = {
         AssetServerPlugin.init({
             route: 'assets',
             assetUploadDir: path.join(__dirname, '../static/assets'),
-            assetUrlPrefix: 'http://localhost:3000/assets/',
+            namingStrategy: new DefaultAssetNamingStrategy(),
+            storageStrategyFactory: configureS3AssetStorage({
+                bucket: process.env.CLOUDFLARE_R2_BUCKET || 'your-bucket-name',
+                credentials: {
+                    accessKeyId: process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || 'your-access-key-id',
+                    secretAccessKey: process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || 'your-secret-access-key',
+                },
+                nativeS3Configuration: {
+                    endpoint: process.env.CLOUDFLARE_R2_ENDPOINT || 'https://<account-id>.r2.cloudflarestorage.com',
+                    forcePathStyle: true,
+                    signatureVersion: 'v4',
+                    region: 'auto', // Cloudflare R2不需要特定区域，但S3 SDK要求此字段
+                },
+            }),
+            assetUrlPrefix: process.env.ASSET_URL_PREFIX || 'https://<your-cdn-domain>.com', // 公共访问URL，可以是Cloudflare CDN
         }),
         DefaultJobQueuePlugin,
         DefaultSearchPlugin,

@@ -4,3 +4,4 @@ node_modules
 /static
 __data__
 .history
+.env
