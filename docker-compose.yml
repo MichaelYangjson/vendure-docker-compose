@@ -12,6 +12,8 @@ services:
     environment:
       DATABASE_HOST: database
       DATABASE_PORT: 5432
+      ADMIN_API_PATH: admin-api
+      SHOP_API_PATH: shop-api
     depends_on:
       - database
       - worker
@@ -23,6 +25,12 @@ services:
       - "traefik.http.routers.vendure-server.entrypoints=websecure"
       - "traefik.http.routers.vendure-server.tls.certResolver=letsencrypt"
       - "traefik.http.services.vendure-server.loadbalancer.server.port=3000"
+      - "traefik.http.middlewares.vendure-admin-strip.stripprefix.prefixes=/admin-api"
+      - "traefik.http.middlewares.vendure-shop-strip.stripprefix.prefixes=/shop-api"
+      - "traefik.http.routers.vendure-admin-api.rule=Host(`admin.futuretools.app`) && PathPrefix(`/admin-api`)"
+      - "traefik.http.routers.vendure-admin-api.middlewares=vendure-admin-strip"
+      - "traefik.http.routers.vendure-shop-api.rule=Host(`admin.futuretools.app`) && PathPrefix(`/shop-api`)"
+      - "traefik.http.routers.vendure-shop-api.middlewares=vendure-shop-strip"
   worker:
     build:
       context: .
